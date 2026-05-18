@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(135deg,#1e3c72,#2a5298);
+    }
+
+    .container{
+      text-align:center;
+      background:white;
+      padding:25px;
+      border-radius:15px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    h1{
+      margin-bottom:15px;
+      color:#1e3c72;
+    }
+
+    .mode-buttons{
+      margin-bottom:15px;
+    }
+
+    button{
+      padding:10px 18px;
+      margin:5px;
+      border:none;
+      border-radius:8px;
+      background:#1e3c72;
+      color:white;
+      cursor:pointer;
+      font-size:16px;
+      transition:0.3s;
+    }
+
+    button:hover{
+      background:#2a5298;
+    }
+
+    .board{
+      display:grid;
+      grid-template-columns:repeat(3,100px);
+      grid-template-rows:repeat(3,100px);
+      gap:5px;
+      justify-content:center;
+      margin:20px auto;
+    }
+
+    .cell{
+      background:#f0f0f0;
+      border-radius:10px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-size:40px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .cell:hover{
+      background:#dbe9ff;
+    }
+
+    #status{
+      font-size:20px;
+      margin-top:10px;
+      color:#333;
+      font-weight:bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Tic Tac Toe</h1>
+
+    <div class="mode-buttons">
+      <button onclick="setMode('player')">2 Players</button>
+      <button onclick="setMode('computer')">Vs Computer</button>
+    </div>
+
+    <div class="board" id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+
+    <div id="status">Player X's Turn</div>
+
+    <button onclick="restartGame()">Restart Game</button>
+  </div>
+
+  <script>
+    const cells = document.querySelectorAll(".cell");
+    const statusText = document.getElementById("status");
+
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let gameActive = true;
+    let mode = "player";
+
+    const winningConditions = [
+      [0,1,2],
+      [3,4,5],
+      [6,7,8],
+      [0,3,6],
+      [1,4,7],
+      [2,5,8],
+      [0,4,8],
+      [2,4,6]
+    ];
+
+    function setMode(selectedMode){
+      mode = selectedMode;
+      restartGame();
+    }
+
+    cells.forEach(cell => {
+      cell.addEventListener("click", handleCellClick);
+    });
+
+    function handleCellClick(event){
+      const clickedCell = event.target;
+      const index = clickedCell.getAttribute("data-index");
+
+      if(board[index] !== "" || !gameActive){
+        return;
+      }
+
+      makeMove(index, currentPlayer);
+
+      if(mode === "computer" && gameActive && currentPlayer === "O"){
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function makeMove(index, player){
+      board[index] = player;
+      cells[index].textContent = player;
+
+      checkWinner();
+
+      if(gameActive){
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusText.textContent = `Player ${currentPlayer}'s Turn`;
+      }
+    }
+
+    function computerMove(){
+      let emptyCells = [];
+
+      board.forEach((cell, index) => {
+        if(cell === ""){
+          emptyCells.push(index);
+        }
+      });
+
+      if(emptyCells.length === 0) return;
+
+      let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
+      makeMove(randomIndex, "O");
+    }
+
+    function checkWinner(){
+      let roundWon = false;
+
+      for(let i = 0; i < winningConditions.length; i++){
+        const [a,b,c] = winningConditions[i];
+
+        if(
+          board[a] &&
+          board[a] === board[b] &&
+          board[a] === board[c]
+        ){
+          roundWon = true;
+          break;
+        }
+      }
+
+      if(roundWon){
+        statusText.textContent = `Player ${currentPlayer} Wins!`;
+        gameActive = false;
+        return;
+      }
+
+      if(!board.includes("")){
+        statusText.textContent = "Game Draw!";
+        gameActive = false;
+      }
+    }
+
+    function restartGame(){
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      gameActive = true;
+
+      cells.forEach(cell => {
+        cell.textContent = "";
+      });
+
+      statusText.textContent = "Player X's Turn";
+    }
+  </script>
+
+</body>
+</html>
